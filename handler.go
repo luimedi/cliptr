@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 
-	"github.com/getlantern/systray"
 	"golang.design/x/clipboard"
 )
 
@@ -16,24 +15,10 @@ func NewHandler() *Handler {
 }
 
 func (h *Handler) AddAction(title string, tooltip string, callback func(string) string) {
-	menuItem := systray.AddMenuItemCheckbox(title, tooltip, true)
 	action := HandlerAction{true, callback}
 
 	h.actions = append(h.actions, &action)
 
-	go func() {
-		for {
-			<-menuItem.ClickedCh
-
-			if menuItem.Checked() {
-				menuItem.Uncheck()
-				action.IsActive = false
-			} else {
-				menuItem.Check()
-				action.IsActive = true
-			}
-		}
-	}()
 }
 
 func (h *Handler) Process(text string) string {
