@@ -15,7 +15,12 @@ func NewHandler() *Handler {
 }
 
 func (h *Handler) AddAction(title string, tooltip string, callback func(string) string) {
-	action := HandlerAction{true, callback}
+	action := HandlerAction{
+		Title:    title,
+		Tooltip:  tooltip,
+		IsActive: true,
+		Callback: callback,
+	}
 
 	h.actions = append(h.actions, &action)
 
