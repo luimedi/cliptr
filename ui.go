@@ -97,7 +97,8 @@ func (m UIModel) View() string {
 	s.WriteString("\n\n")
 
 	// Handlers list
-	s.WriteString(lipgloss.NewStyle().Bold(true).Render("Active Handlers:") + "\n")
+	s.WriteString(lipgloss.NewStyle().Bold(true).Render("Active Handlers:"))
+	s.WriteByte('\n')
 	actions := m.handler.GetActionsInfo()
 	for i, action := range actions {
 		cursor := "  "
