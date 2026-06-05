@@ -43,13 +43,11 @@ func (m UIModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor--
 			}
 		case "down", "j":
-			if m.cursor < len(m.handler.actions)-1 {
+			if m.cursor < m.handler.Len()-1 {
 				m.cursor++
 			}
 		case " ", "enter":
-			if m.cursor >= 0 && m.cursor < len(m.handler.actions) {
-				m.handler.actions[m.cursor].IsActive = !m.handler.actions[m.cursor].IsActive
-			}
+			m.handler.ToggleAction(m.cursor)
 		}
 	case spinner.TickMsg:
 		var cmd tea.Cmd
@@ -100,7 +98,8 @@ func (m UIModel) View() string {
 
 	// Handlers list
 	s.WriteString(lipgloss.NewStyle().Bold(true).Render("Active Handlers:") + "\n")
-	for i, action := range m.handler.actions {
+	actions := m.handler.GetActionsInfo()
+	for i, action := range actions {
 		cursor := "  "
 		if m.cursor == i {
 			cursor = cursorStyle.Render("❯ ")
