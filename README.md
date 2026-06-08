@@ -31,7 +31,7 @@ Since Cliptr uses X11 to communicate with the clipboard on Linux, you must insta
 To install the latest version globally on your system, run:
 
 ```bash
-go install github.com/cirtool/cliptr@latest
+go install github.com/luimedi/cliptr@latest
 ```
 
 > [!NOTE]
