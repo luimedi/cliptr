@@ -13,7 +13,7 @@ var Version string
 func main() {
 	// Initialize clipboard
 	if err := clipboard.Init(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: failed to initialize clipboard. Ensure xclip, xsel, or wl-clipboard is installed. Details: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error: failed to initialize clipboard: %v\n", err)
 		os.Exit(1)
 	}
 
