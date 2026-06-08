@@ -1,4 +1,4 @@
-module github.com/cirtool/cliptr
+module github.com/luimedi/cliptr
 
 go 1.26.0
 
