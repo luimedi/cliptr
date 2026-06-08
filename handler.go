@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 
-	"github.com/getlantern/systray"
 	"golang.design/x/clipboard"
 )
 
@@ -16,24 +15,42 @@ func NewHandler() *Handler {
 }
 
 func (h *Handler) AddAction(title string, tooltip string, callback func(string) string) {
-	menuItem := systray.AddMenuItemCheckbox(title, tooltip, true)
-	action := HandlerAction{true, callback}
+	action := HandlerAction{
+		Title:    title,
+		Tooltip:  tooltip,
+		IsActive: true,
+		Callback: callback,
+	}
 
 	h.actions = append(h.actions, &action)
+}
 
-	go func() {
-		for {
-			<-menuItem.ClickedCh
+func (h *Handler) Len() int {
+	return len(h.actions)
+}
 
-			if menuItem.Checked() {
-				menuItem.Uncheck()
-				action.IsActive = false
-			} else {
-				menuItem.Check()
-				action.IsActive = true
-			}
+func (h *Handler) ToggleAction(index int) {
+	if index >= 0 && index < len(h.actions) {
+		h.actions[index].IsActive = !h.actions[index].IsActive
+	}
+}
+
+type ActionInfo struct {
+	Title    string
+	Tooltip  string
+	IsActive bool
+}
+
+func (h *Handler) GetActionsInfo() []ActionInfo {
+	info := make([]ActionInfo, len(h.actions))
+	for i, action := range h.actions {
+		info[i] = ActionInfo{
+			Title:    action.Title,
+			Tooltip:  action.Tooltip,
+			IsActive: action.IsActive,
 		}
-	}()
+	}
+	return info
 }
 
 func (h *Handler) Process(text string) string {
@@ -46,16 +63,12 @@ func (h *Handler) Process(text string) string {
 }
 
 func (h *Handler) Listen() {
-	err := clipboard.Init()
-	if err != nil {
-		panic(err)
-	}
-
 	ch := clipboard.Watch(context.TODO(), clipboard.FmtText)
 	for data := range ch {
-		output := h.Process(string(data))
+		inputStr := string(data)
+		output := h.Process(inputStr)
 
-		if output != string(data) {
+		if output != inputStr {
 			clipboard.Write(clipboard.FmtText, []byte(output))
 		}
 	}

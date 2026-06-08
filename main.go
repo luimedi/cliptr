@@ -1,38 +1,44 @@
 package main
 
 import (
-	"github.com/getlantern/systray"
+	"fmt"
+	"os"
+	"runtime/debug"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"golang.design/x/clipboard"
 )
 
 var Version string
-var handler = NewHandler()
 
-func main() {
-	go func() {
-		handler.Listen()
-	}()
-	systray.Run(onReady, func() {})
+func init() {
+	if Version == "" {
+		if info, ok := debug.ReadBuildInfo(); ok {
+			Version = info.Main.Version
+		}
+	}
+	if Version == "" {
+		Version = "dev"
+	}
 }
 
-func onReady() {
-	data, err := Asset("winres/taskbaricon.ico")
-	if err != nil {
-		panic("Taskbar icon data not found in binary")
+func main() {
+	// Initialize clipboard
+	if err := clipboard.Init(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: failed to initialize clipboard: %v\n", err)
+		os.Exit(1)
 	}
 
-	systray.SetTemplateIcon(data, data)
+	handler := NewHandler()
+	handler.AddAction("Trim", "Remove leading and trailing whitespace", Trim)
+	handler.AddAction("Capitalize", "Capitalize words if text is fully uppercase", CapitalizeUppercase)
 
-	systray.SetTitle("Cliptr")
-	systray.SetTooltip("Cliptr " + Version)
+	// Listen to clipboard changes in the background
+	go handler.Listen()
 
-	handler.AddAction("Trim", "Remove Spaces at start and end of string", Trim)
-	handler.AddAction("Capitalize Uppercase", "Capitalize each word if value is uppercase", CapitalizeUppercase)
-
-	systray.AddSeparator()
-
-	mQuitOrig := systray.AddMenuItem("Quit", "Close the application")
-	go func() {
-		<-mQuitOrig.ClickedCh
-		systray.Quit()
-	}()
+	p := tea.NewProgram(NewUIModel(handler))
+	if _, err := p.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error running cliptr: %v\n", err)
+		os.Exit(1)
+	}
 }
