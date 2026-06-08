@@ -93,7 +93,11 @@ func (m UIModel) View() string {
 	var s strings.Builder
 
 	// Header / Title
-	s.WriteString(titleStyle.Render("Cliptr - Clipboard Transformer"))
+	titleText := "Cliptr"
+	if Version != "" {
+		titleText = fmt.Sprintf("Cliptr %s", Version)
+	}
+	s.WriteString(titleStyle.Render(titleText + " - Clipboard Transformer"))
 	s.WriteString("\n\n")
 
 	// Handlers list

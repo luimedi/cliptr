@@ -3,12 +3,24 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime/debug"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.design/x/clipboard"
 )
 
 var Version string
+
+func init() {
+	if Version == "" {
+		if info, ok := debug.ReadBuildInfo(); ok {
+			Version = info.Main.Version
+		}
+	}
+	if Version == "" {
+		Version = "dev"
+	}
+}
 
 func main() {
 	// Initialize clipboard
